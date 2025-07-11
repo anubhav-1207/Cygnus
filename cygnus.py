@@ -8,7 +8,7 @@ HTML_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cygnus Terminal</title>
+    <title>Cygnus - BY ANUBHAV GHOSHAL</title>
     <style>
         body { background: black; color: lime; font-family: monospace; padding: 20px; }
         input { background: black; color: lime; border: none; font-size: 16px; width: 100%; }
