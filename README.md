@@ -1,5 +1,5 @@
 # Cygnus
-## What is Cygnus?
+## ⁉️ What is Cygnus?
 
 Cygnus is a simple, customizable, command-line-based code interpreter — written entirely in Python — that simulates a small programming language and terminal environment.
 
@@ -49,7 +49,7 @@ iii. Update x with the new result
 
 ---
 
-## Why Cygnus is Special (Even Though It's Simple)
+## 🕯️✨ Why Cygnus is Special (Even Though It's Simple)
 
 It’s not just a calculator — it mimics how programming languages store, manipulate, and interact with data.
 
@@ -72,7 +72,7 @@ It looks and feels like a shell, making beginners feel like they’re building t
 
 ---
 
-## What Can Cygnus Do?
+## 🌐 What Can Cygnus Do?
 
 Cygnus might look simple — but it’s a fully working mini-interpreter built from the ground up. It mimics some of the core behavior of a real programming language or terminal environment.
 
@@ -125,7 +125,7 @@ print a   # Outputs: 15
 
 ---
 
-**Utility Commands**
+**⚙️ Utility Commands**
 
 ```rename old new```
 *Renames a variable without changing its value.*
@@ -140,7 +140,7 @@ print a   # Outputs: 15
 
 ---
 
-**Error Handling**
+**‼️ Error Handling**
 
 Cygnus handles most common errors gracefully and gives helpful messages:
 
@@ -156,7 +156,7 @@ Cygnus handles most common errors gracefully and gives helpful messages:
 
 ---
 
-**Extra Touches**
+**🎨 Extra Touches**
 
 • Color-coded outputs (using colorama) make it feel like a real terminal.
 
