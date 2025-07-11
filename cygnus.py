@@ -1,191 +1,112 @@
-import colorama 
-from colorama import init, Fore, Style
+from flask import Flask, request, render_template_string
 
-init(autoreset=True)
-
+app = Flask(__name__)
 variables = {}
+chat_history = []
 
-def run_cygnus_shell():
-    cygnus_art = Fore.CYAN + r'''
-                
-  ______                                                         
- /      \                                                        
-|  $$$$$$\ __    __   ______   _______   __    __   _______      
-| $$   \$$|  \  |  \ /      \ |       \ |  \  |  \ /       \     
-| $$      | $$  | $$|  $$$$$$\| $$$$$$$\| $$  | $$|  $$$$$$$     
-| $$   __ | $$  | $$| $$  | $$| $$  | $$| $$  | $$ \$$    \      
-| $$__/  \| $$__/ $$| $$__| $$| $$  | $$| $$__/ $$ _\$$$$$$\     
- \$$    $$ \$$    $$ \$$    $$| $$  | $$ \$$    $$|       $$     
-  \$$$$$$  _\$$$$$$$ _\$$$$$$$ \$$   \$$  \$$$$$$  \$$$$$$$      
-          |  \__| $$|  \__| $$                                   
-           \$$    $$ \$$    $$                                   
-            \$$$$$$   \$$$$$$                                             
+HTML_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cygnus Terminal</title>
+    <style>
+        body { background: black; color: lime; font-family: monospace; padding: 20px; }
+        input { background: black; color: lime; border: none; font-size: 16px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>Welcome to Cygnus Web Terminal</h2>
+    <form method="POST">
+        <input name="user_input" placeholder="Enter a command..." autofocus autocomplete="off" />
+    </form>
+    <pre>{{ chat }}</pre>
+</body>
+</html>
 '''
-    print(Style.BRIGHT + cygnus_art)
 
-#Errors : 
-def ass_error():
-    print(Fore.RED+'!!! ~ Assignment Error')
+def process_command(command):
+    parts = command.strip().split()
 
-def name_error():
-    print(Fore.RED+f'!!! ~ Name Error')
+    if not parts:
+        return "Invalid command."
 
-def opr_error():
-    print(Fore.RED+'!!! ~ Operation Error')
-
-def zero_div():
-    print(Fore.RED+'!!! ~ Zero Division Error')
-
-def format_error():
-    print(Fore.RED+'!!! ~ Format Error')
-
-    
-
-username = input("!!! ~ Username required to initialize Cygnus session. Please input desired identifier : ")
-
-run_cygnus_shell()
-
-
-
-while True:
-    command = input(Fore.BLUE + f'{username}' + Fore.WHITE+'@cygnus:~$ ' + Fore.CYAN)
-    if command == 'exit':
-        break
-
-    parts = command.split()
-
-
-    # Set Command
     if parts[0] == 'set':
         if len(parts) == 4 and parts[2] == '=' and parts[3].isdigit():
-            var_name = parts[1]
-            value = int(parts[3])
-            variables[var_name] = value     
+            variables[parts[1]] = int(parts[3])
+            return f"Set {parts[1]} = {parts[3]}"
+        return "!!! ~ Assignment Error"
 
-        else:
-            ass_error()
+    elif parts[0] == 'print':
+        if len(parts) == 2 and parts[1] in variables:
+            return f"{parts[1]} = {variables[parts[1]]}"
+        return "!!! ~ Name Error"
 
-    
-
-    # Print Command
-    elif len(parts) == 2 and parts[0] == 'print':
-        var_name = parts[1]
-        if var_name in variables : 
-            print(variables[var_name])
-
-        else:
-            name_error()
-
-    # Add command
-    elif parts[0] == 'add':
+    elif parts[0] in ('add', 'sub', 'mul', 'div'):
         if len(parts) == 3 and parts[1] in variables and parts[2].isdigit():
-            value = int(parts[2])
-            var_name = parts[1]
-            variables[var_name] += value
+            var = parts[1]
+            num = int(parts[2])
+            if parts[0] == 'add':
+                variables[var] += num
+            elif parts[0] == 'sub':
+                variables[var] -= num
+            elif parts[0] == 'mul':
+                variables[var] *= num
+            elif parts[0] == 'div':
+                if num == 0:
+                    return '!!! ~ Math Error: Cannot divide by zero'
+                variables[var] //= num
+            return f"{parts[0]} successful: {var} = {variables[var]}"
+        return "!!! ~ Operation Error"
 
-        else:
-            opr_error()
-
-    # Sub Command
-    elif parts[0] == 'sub':
-        if len(parts) == 3 and parts[1] in variables and parts[2].isdigit():
-            value = int(parts[2])
-            var_name = parts[1]
-            variables[var_name] -= value
-
-        else:
-            opr_error()
-            
-    # Mul Command
-    elif parts[0] == 'mul':
-        if len(parts) == 3 and parts[1] in variables and parts[2].isdigit():
-            value = int(parts[2])
-            var_name = parts[1]
-            variables[var_name] *= value
-
-        else:
-            opr_error()
-    # Div Command
-    elif parts[0] == 'div':
-        if len(parts) == 3 and parts[1] in variables and parts[2].isdigit():
-            value = int(parts[2])
-            var_name = parts[1]
-
-            if value == 0:
-                print(Fore.RED + '!!! ~ Math Error: Cannot divide by zero')
-            else:
-                variables[var_name] //= value
-        else:
-            ass_error() if not parts[2].isdigit() else name_error()
-
-    # List Command
     elif parts[0] == 'list':
-        if len(parts) == 1 :
-            if variables:
-                print(Fore.LIGHTMAGENTA_EX+'>>> Variables : ')
-                for var_name,value in variables.items():
-                    print(f'{var_name} = {value}')
+        if variables:
+            return "\n".join(f"{k} = {v}" for k, v in variables.items())
+        return "No variables defined."
 
-            else:
-                name_error()
-
-    # Del Command
     elif parts[0] == 'del':
         if len(parts) == 2 and parts[1] in variables:
-            del variables[var_name]
+            del variables[parts[1]]
+            return f"Deleted {parts[1]}"
+        return "!!! ~ Name Error"
 
-        else:
-            name_error()
-    
-        
-    # Clear Command
     elif parts[0] == 'clear':
-        if len(parts) == 1 and variables:
-            variables.clear()
+        variables.clear()
+        return "All variables cleared."
 
-        else:
-            name_error()
-
-    # Help Command
-    elif parts[0] == 'help':
-        if len(parts) == 1:
-            print(Fore.LIGHTGREEN_EX + '''
-    >>> Cygnus Help Menu:
-
-    set <var> = <value>      : Create a new variable
-    print <var>              : Display a variable's value
-    add <var> <number>       : Add number to variable
-    sub <var> <number>       : Subtract number from variable
-    mul <var> <number>       : Multiply variable by number
-    div <var> <number>       : Integer divide variable (0 not allowed)
-    del <var>                : Delete a specific variable
-    clear                    : Delete all variables
-    list                     : Show all variables and values
-    exit                     : Exit the Cygnus shell
-    help                     : Show this help menu
-    ''')
-        else:
-            format_error()
-
-    #Rename Command
     elif parts[0] == 'rename':
-        if len(parts) == 3:
-            new = parts[2]
-            old = parts[1]
-            
-            if old in variables:
-                if new not in variables:
-                    variables[new] = variables[old]
-                    del variables[old]
+        if len(parts) == 3 and parts[1] in variables and parts[2] not in variables:
+            variables[parts[2]] = variables.pop(parts[1])
+            return f"Renamed {parts[1]} to {parts[2]}"
+        return "!!! ~ Rename Error"
 
-                else:
-                    ass_error()
+    elif parts[0] == 'help':
+        return '''Cygnus Help Menu:
 
-            else:
-                name_error()
+set <var> = <value>      : Create a new variable
+print <var>              : Display a variable's value
+add <var> <number>       : Add number to variable
+sub <var> <number>       : Subtract number from variable
+mul <var> <number>       : Multiply variable by number
+div <var> <number>       : Integer divide variable (0 not allowed)
+del <var>                : Delete a specific variable
+clear                    : Delete all variables
+list                     : Show all variables
+rename <old> <new>       : Rename a variable
+exit                     : Quit the shell (not needed here)'''
 
-        else:
-            format_error()
+    elif parts[0] == 'exit':
+        return "Cygnus session ended. Refresh to restart."
 
+    return "!!! ~ Format Error"
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        user_input = request.form['user_input']
+        chat_history.append(f"You: {user_input}")
+        response = process_command(user_input)
+        chat_history.append(f"Cygnus: {response}")
+    return render_template_string(HTML_TEMPLATE, chat="\n".join(chat_history))
 
+if __name__ == '__main__':
+    app.run(debug=True)
